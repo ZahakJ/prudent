@@ -1,11 +1,11 @@
-// prdesk review page behaviour. No dependencies. All text from the server is
+// prudent review page behaviour. No dependencies. All text from the server is
 // inserted with textContent, never innerHTML.
 (() => {
   'use strict';
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-  const token = ($('meta[name="prdesk-token"]') || {}).content || '';
+  const token = ($('meta[name="prudent-token"]') || {}).content || '';
   const reviewId = document.body.dataset.review;
   const revision = Number(document.body.dataset.revision || 0);
 
@@ -21,7 +21,7 @@
   async function post(action, data) {
     const res = await fetch(`/api/r/${encodeURIComponent(reviewId)}/${action}`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-prdesk-token': token },
+      headers: { 'content-type': 'application/json', 'x-prudent-token': token },
       body: JSON.stringify(data),
       credentials: 'same-origin',
     });
@@ -160,9 +160,9 @@
   function setNotes(on) {
     document.body.classList.toggle('hide-notes', !on);
     if (notesToggle) notesToggle.checked = on;
-    try { localStorage.setItem('prdesk.notes', on ? '1' : '0'); } catch { /* private mode */ }
+    try { localStorage.setItem('prudent.notes', on ? '1' : '0'); } catch { /* private mode */ }
   }
-  try { if (localStorage.getItem('prdesk.notes') === '0') setNotes(false); } catch { /* private mode */ }
+  try { if (localStorage.getItem('prudent.notes') === '0') setNotes(false); } catch { /* private mode */ }
   if (notesToggle) notesToggle.addEventListener('change', () => setNotes(notesToggle.checked));
 
   function gotoNote(dir) {

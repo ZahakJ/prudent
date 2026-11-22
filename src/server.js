@@ -135,7 +135,7 @@ function createServer({ token = crypto.randomBytes(24).toString('base64url') } =
   async function post(req, res, parts) {
     // Decisions may only come from our own pages: they carry the per-run token,
     // which other sites cannot read, and browsers mark their origin.
-    if (!tokensEqual(req.headers['x-prdesk-token'], token)) fail(403, 'missing or wrong token; reload the page');
+    if (!tokensEqual(req.headers['x-prudent-token'], token)) fail(403, 'missing or wrong token; reload the page');
     const origin = req.headers.origin;
     if (origin && !allowedHost(origin.replace(/^http:\/\//, ''))) fail(403, 'cross-origin request refused');
     const site = req.headers['sec-fetch-site'];

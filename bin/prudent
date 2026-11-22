@@ -3,7 +3,7 @@
 
 const [major] = process.versions.node.split('.').map(Number);
 if (major < 20) {
-  process.stderr.write(`prdesk needs Node.js 20 or newer (this is ${process.version}).\n`);
+  process.stderr.write(`prudent needs Node.js 20 or newer (this is ${process.version}).\n`);
   process.exit(2);
 }
 

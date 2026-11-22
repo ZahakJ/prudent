@@ -1,21 +1,21 @@
 ---
-name: prdesk
-description: Submit a finished change (a git branch or a patch) to the user's local prdesk review desk with plain-language notes, then read the human reviewer's decision and comments and resubmit. Use when a change is meant for an upstream project or needs human sign-off before it is pushed, posted or merged, or when the user says "send it to prdesk", "put it up for review" or asks what the reviewer said.
+name: prudent
+description: Submit a finished change (a git branch or a patch) to the user's local prudent review desk with plain-language notes, then read the human reviewer's decision and comments and resubmit. Use when a change is meant for an upstream project or needs human sign-off before it is pushed, posted or merged, or when the user says "send it to prudent", "put it up for review" or asks what the reviewer said.
 ---
 
-# Review through prdesk
+# Review through prudent
 
-prdesk is a local web app where the user reviews your patch next to your
+prudent is a local web app where the user reviews your patch next to your
 explanation, then approves or requests changes. The user may never have seen
 this codebase, so your notes carry the review. Never push, open a PR or post
-upstream yourself; prdesk is the gate.
+upstream yourself; prudent is the gate.
 
-Check it is installed: `prdesk --version`. If it is not on PATH, ask the user
-where prdesk lives and run `node <that folder>/bin/prdesk`.
+Check it is installed: `prudent --version`. If it is not on PATH, ask the user
+where prudent lives and run `node <that folder>/bin/prudent`.
 
 ## 1. Write the notes
 
-Write `notes.md` outside the repository (or leave it untracked). Run `prdesk guide`
+Write `notes.md` outside the repository (or leave it untracked). Run `prudent guide`
 once: it prints the notes format with a complete example. The sections are:
 
 - `# Summary`: what the project is, the problem, the fix, who benefits, in
@@ -34,8 +34,8 @@ once: it prints the notes format with a complete example. The sections are:
 ## 2. Check, then submit
 
 ```sh
-prdesk check --notes notes.md --repo . --base origin/main --head HEAD
-prdesk submit --repo . --base origin/main --head HEAD \
+prudent check --notes notes.md --repo . --base origin/main --head HEAD
+prudent submit --repo . --base origin/main --head HEAD \
   --title "<one line>" --project "<Project>" --upstream <url> \
   --notes notes.md --id <short-id>
 ```
@@ -45,17 +45,17 @@ before submitting. `--base` defaults to the merge-base with `origin/HEAD`.
 For a loose patch use `--patch file.patch` instead of `--repo/--base/--head`.
 
 Tell the user the review page URL that `submit` printed. If it says the
-server is not running, tell them to run `prdesk serve`.
+server is not running, tell them to run `prudent serve`.
 
 ## 3. Read the decision
 
 ```sh
-prdesk status <short-id> --json
+prudent status <short-id> --json
 ```
 
-Or block until the user decides: `prdesk wait <short-id> --json --timeout 3600`.
+Or block until the user decides: `prudent wait <short-id> --json --timeout 3600`.
 
-The JSON has `schema: "prdesk.status/v1"`, `status` (`pending`, `approved`,
+The JSON has `schema: "prudent.status/v1"`, `status` (`pending`, `approved`,
 `changes_requested`), `message`, `checklist`, and `comments`. Line comments
 have `file`, `side` (`new` or `old`), `line` and `lineText`; each comment has
 the `revision` it was made on. Exit codes: 0 approved, 10 changes requested,
@@ -67,7 +67,7 @@ Address every comment on the current revision, update the commits and the
 notes (say what changed and answer the reviewer's points), then:
 
 ```sh
-prdesk resubmit <short-id> --notes notes.md -m "<what changed in one line>"
+prudent resubmit <short-id> --notes notes.md -m "<what changed in one line>"
 ```
 
 Options left out are taken from the previous revision (same repo, base and

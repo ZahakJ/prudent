@@ -1,6 +1,6 @@
 'use strict';
 
-// On-disk layout, under $PRDESK_HOME (default ~/.local/share/prdesk):
+// On-disk layout, under $PRUDENT_HOME (default ~/.local/share/prudent):
 //   reviews/<id>/meta.json        title, project, upstream, current revision
 //   reviews/<id>/decision.json    the reviewer's status, comments, checklist
 //   reviews/<id>/revs/<n>/        info.json, patch.diff, notes.md, commits.json, commits.patch
@@ -24,7 +24,7 @@ const SCHEMA_VERSION = 1;
 class UserError extends Error {}
 
 function home() {
-  return path.resolve(process.env.PRDESK_HOME || path.join(os.homedir(), '.local', 'share', 'prdesk'));
+  return path.resolve(process.env.PRUDENT_HOME || path.join(os.homedir(), '.local', 'share', 'prudent'));
 }
 
 function reviewsDir() {
@@ -87,7 +87,7 @@ function emptyDecision() {
 }
 
 function loadMeta(id) {
-  if (!exists(id)) throw new UserError(`no review "${id}" (see: prdesk list)`);
+  if (!exists(id)) throw new UserError(`no review "${id}" (see: prudent list)`);
   return readJson(path.join(reviewDir(id), 'meta.json'));
 }
 
@@ -134,7 +134,7 @@ function addRevision(id, data, { create }) {
   const metaFile = path.join(dir, 'meta.json');
   let meta;
   if (create) {
-    if (fs.existsSync(metaFile)) throw new UserError(`review "${id}" already exists; use: prdesk resubmit ${id} ...`);
+    if (fs.existsSync(metaFile)) throw new UserError(`review "${id}" already exists; use: prudent resubmit ${id} ...`);
     meta = { schema: SCHEMA_VERSION, id, createdAt: now(), revision: 0 };
   } else {
     meta = loadMeta(id);

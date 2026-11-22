@@ -4,10 +4,10 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-// Points PRDESK_HOME at a fresh temporary folder and returns it.
+// Points PRUDENT_HOME at a fresh temporary folder and returns it.
 function tempHome() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prdesk-test-'));
-  process.env.PRDESK_HOME = dir;
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prudent-test-'));
+  process.env.PRUDENT_HOME = dir;
   return dir;
 }
 

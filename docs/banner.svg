@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-labelledby="title desc">
-  <title id="title">prdesk</title>
-  <desc id="desc">prdesk wordmark beside a small diff panel with a check mark.</desc>
+  <title id="title">prudent</title>
+  <desc id="desc">prudent wordmark beside a small diff panel with a check mark.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#14161b"/>
@@ -19,7 +19,7 @@
   <g transform="translate(96 92)">
     <rect x="0" y="6" width="64" height="64" rx="16" fill="none" stroke="#7cc79a" stroke-width="5"/>
     <path d="M17 40l11 11 20-26" fill="none" stroke="#7cc79a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="92" y="62" fill="#e6e8ee" font-family="Inter, 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="72" font-weight="650" letter-spacing="-1.5">prdesk</text>
+    <text x="92" y="62" fill="#e6e8ee" font-family="Inter, 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="72" font-weight="650" letter-spacing="-1.5">prudent</text>
     <text x="2" y="132" fill="#9aa2b1" font-family="Inter, 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="25">A calm local review desk for the patches your AI agents write.</text>
   </g>
 

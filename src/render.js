@@ -20,7 +20,7 @@ function layout({ title, token, body, bodyAttrs = '' }) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta name="prdesk-token" content="${token}">
+<meta name="prudent-token" content="${token}">
 <title>${title}</title>
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/static/app.css">
@@ -52,7 +52,7 @@ function counts(add, del) {
 }
 
 function brand() {
-  return html`<a class="brand" href="/"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect x="1" y="1" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 10.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>prdesk</a>`;
+  return html`<a class="brand" href="/"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect x="1" y="1" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 10.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>prudent</a>`;
 }
 
 // ---------- home ----------
@@ -83,12 +83,12 @@ function homePage({ reviews, token }) {
     <tbody>${rows}</tbody></table>`
     : html`<div class="empty">
       <p>No reviews yet. An agent submits one with:</p>
-      <pre>prdesk submit --repo path/to/repo --base origin/main --head my-branch \\
+      <pre>prudent submit --repo path/to/repo --base origin/main --head my-branch \\
   --title "Short title" --project "Project" --notes notes.md</pre>
-      <p>Or try the sample: <code>prdesk demo</code></p>
+      <p>Or try the sample: <code>prudent demo</code></p>
     </div>`}
 </main>`;
-  return layout({ title: 'prdesk', token, body });
+  return layout({ title: 'prudent', token, body });
 }
 
 // ---------- review ----------
@@ -410,12 +410,12 @@ function reviewPage(m, { token, tab }) {
 ${decideDialog(m)}
 ${helpDialog()}`;
   const attrs = html`data-review="${m.id}" data-revision="${meta.revision}" data-initial-tab="${tab ? active : ''}"`;
-  return layout({ title: `${meta.title} · prdesk`, token, body, bodyAttrs: attrs.toString() });
+  return layout({ title: `${meta.title} · prudent`, token, body, bodyAttrs: attrs.toString() });
 }
 
 function errorPage(status, message, token) {
   return layout({
-    title: `${status} · prdesk`, token,
+    title: `${status} · prudent`, token,
     body: html`<header class="topbar">${brand()}</header><main class="home"><h1>${status}</h1><p>${message}</p><p><a href="/">Back to reviews</a></p></main>`,
   });
 }

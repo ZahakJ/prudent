@@ -39,7 +39,7 @@ function defaultBase(repo, head) {
   throw new UserError('could not guess the base; pass --base <ref> (for example origin/main)');
 }
 
-// Everything prdesk needs from a repository for base...head.
+// Everything prudent needs from a repository for base...head.
 function capture(repo, base, head) {
   if (!tryGit(repo, ['rev-parse', '--git-dir'])) throw new UserError(`${repo} is not a git repository`);
   const headRef = head || 'HEAD';

@@ -11,7 +11,7 @@ const { slugify } = require('./util');
 const pkg = require('../package.json');
 
 const DEFAULT_PORT = 4477;
-const STATUS_SCHEMA = 'prdesk.status/v1';
+const STATUS_SCHEMA = 'prudent.status/v1';
 const STATUS_TEXT = { pending: 'PENDING', approved: 'APPROVED', changes_requested: 'CHANGES REQUESTED' };
 
 const CAPTURE_OPTS = {
@@ -21,9 +21,9 @@ const CAPTURE_OPTS = {
 };
 
 const HELP = {
-  main: `prdesk ${pkg.version}: a local review desk for patches written by AI agents.
+  main: `prudent ${pkg.version}: a local review desk for patches written by AI agents.
 
-Usage: prdesk <command> [options]
+Usage: prudent <command> [options]
 
 Agent commands
   submit      Submit a branch (--repo) or a patch file (--patch) with notes for review
@@ -38,13 +38,13 @@ Reviewer commands
   serve       Start the review web app on http://127.0.0.1:${DEFAULT_PORT}
   demo        Create a sample review to look at
 
-Run "prdesk help <command>" or "prdesk <command> --help" for details.
-Data lives in $PRDESK_HOME (default ~/.local/share/prdesk).`,
+Run "prudent help <command>" or "prudent <command> --help" for details.
+Data lives in $PRUDENT_HOME (default ~/.local/share/prudent).`,
 
   submit: `Usage:
-  prdesk submit --repo <path> [--base <ref>] [--head <ref>] --notes <notes.md>
+  prudent submit --repo <path> [--base <ref>] [--head <ref>] --notes <notes.md>
                 --title "..." [--project "..."] [--upstream <url>] [--id <slug>]
-  prdesk submit --patch <file.patch> --notes <notes.md> --title "..." [...]
+  prudent submit --patch <file.patch> --notes <notes.md> --title "..." [...]
 
 Captures the diff of base...head (from their merge-base, like a pull request),
 the commit messages and the notes, and creates a review.
@@ -61,7 +61,7 @@ the commit messages and the notes, and creates a review.
   -m, --message  A line about this revision
   --json      Print the result as JSON`,
 
-  resubmit: `Usage: prdesk resubmit <id> [--repo <path>] [--base <ref>] [--head <ref>] [--patch <file>]
+  resubmit: `Usage: prudent resubmit <id> [--repo <path>] [--base <ref>] [--head <ref>] [--patch <file>]
                        [--notes <notes.md>] [--title ...] [-m "what changed"]
 
 Adds a new revision. Options you leave out are taken from the previous
@@ -69,7 +69,7 @@ revision (same repo, base and head refs, notes file contents if --notes is
 omitted). The status goes back to pending; earlier revisions and comments are
 kept, and the reviewer sees what changed since the revision they last opened.`,
 
-  status: `Usage: prdesk status <id> [--json]
+  status: `Usage: prudent status <id> [--json]
 
 Prints the decision (pending, approved, changes_requested), the reviewer's
 message, checklist and comments. Line comments include the file, line and the
@@ -77,28 +77,28 @@ text of that line. --json prints the stable "${STATUS_SCHEMA}" object
 documented in the README.
 Exit code: 0 approved, 10 changes requested, 11 pending.`,
 
-  wait: `Usage: prdesk wait <id> [--timeout <seconds>] [--json]
+  wait: `Usage: prudent wait <id> [--timeout <seconds>] [--json]
 
 Waits until the current revision is approved or has changes requested, then
-prints the same output as "prdesk status". Exit codes as for status; 12 on timeout.`,
+prints the same output as "prudent status". Exit codes as for status; 12 on timeout.`,
 
-  check: `Usage: prdesk check --notes <notes.md> (--repo <path> [--base] [--head] | --patch <file>)
+  check: `Usage: prudent check --notes <notes.md> (--repo <path> [--base] [--head] | --patch <file>)
 
 Reports missing sections and walkthrough anchors that do not match the diff.`,
 
-  list: `Usage: prdesk list [--json]`,
+  list: `Usage: prudent list [--json]`,
 
-  guide: `Usage: prdesk guide\n\nPrints WRITING-NOTES.md: how to write notes.md, with a complete example.`,
+  guide: `Usage: prudent guide\n\nPrints WRITING-NOTES.md: how to write notes.md, with a complete example.`,
 
-  serve: `Usage: prdesk serve [--port <n>]
+  serve: `Usage: prudent serve [--port <n>]
 
 Serves the review app on 127.0.0.1 only (default port ${DEFAULT_PORT}).
-Writes $PRDESK_HOME/server.json with the URL so other commands can print links.`,
+Writes $PRUDENT_HOME/server.json with the URL so other commands can print links.`,
 
-  demo: `Usage: prdesk demo
+  demo: `Usage: prudent demo
 
 Creates a sample review (two revisions of a made-up project) so you can try
-the review page. Then run "prdesk serve" and open the printed URL.`,
+the review page. Then run "prudent serve" and open the printed URL.`,
 };
 
 function out(s) {
@@ -110,14 +110,14 @@ function parse(cmd, argv, options, positionals = 0) {
   try {
     r = parseArgs({ args: argv, options: { ...options, help: { type: 'boolean', short: 'h' } }, allowPositionals: true, strict: true });
   } catch (e) {
-    throw new UserError(`${e.message.replace(/\. To specify.*$/s, '')}\nRun "prdesk help ${cmd}" for usage.`);
+    throw new UserError(`${e.message.replace(/\. To specify.*$/s, '')}\nRun "prudent help ${cmd}" for usage.`);
   }
   if (r.values.help) {
     out(HELP[cmd]);
     process.exit(0);
   }
   if (r.positionals.length > positionals) {
-    throw new UserError(`unexpected argument "${r.positionals[positionals]}"\nRun "prdesk help ${cmd}" for usage.`);
+    throw new UserError(`unexpected argument "${r.positionals[positionals]}"\nRun "prudent help ${cmd}" for usage.`);
   }
   return r;
 }
@@ -188,12 +188,12 @@ function report(v, id, data, rev, warnings, action) {
     return;
   }
   out(`${action} ${id} revision ${rev}: ${t.files} file(s), +${t.additions} -${t.deletions}`);
-  out(`Review page: ${reviewUrl(id)}${serverUrl() ? '' : '  (start the server with: prdesk serve)'}`);
+  out(`Review page: ${reviewUrl(id)}${serverUrl() ? '' : '  (start the server with: prudent serve)'}`);
   if (warnings.length) {
     out(`\nNotes warnings (fix them and resubmit if they matter):`);
     for (const w of warnings) out(`  - ${w}`);
   }
-  out(`\nRead the decision with: prdesk status ${id}`);
+  out(`\nRead the decision with: prudent status ${id}`);
 }
 
 function validateUpstream(u) {
@@ -217,7 +217,7 @@ function cmdSubmit(argv) {
 function cmdResubmit(argv) {
   const { values: v, positionals } = parse('resubmit', argv, CAPTURE_OPTS, 1);
   const id = positionals[0];
-  if (!id) throw new UserError('usage: prdesk resubmit <id> [options]');
+  if (!id) throw new UserError('usage: prudent resubmit <id> [options]');
   validateUpstream(v.upstream);
   const meta = store.loadMeta(id);
   const prev = store.loadRevision(id, meta.revision);
@@ -296,7 +296,7 @@ const EXIT = { approved: 0, changes_requested: 10, pending: 11 };
 
 function cmdStatus(argv) {
   const { values: v, positionals } = parse('status', argv, { json: { type: 'boolean' } }, 1);
-  if (!positionals[0]) throw new UserError('usage: prdesk status <id> [--json]');
+  if (!positionals[0]) throw new UserError('usage: prudent status <id> [--json]');
   const s = statusObject(positionals[0]);
   out(v.json ? JSON.stringify(s, null, 2) : statusText(s));
   return EXIT[s.status];
@@ -305,7 +305,7 @@ function cmdStatus(argv) {
 async function cmdWait(argv) {
   const { values: v, positionals } = parse('wait', argv, { json: { type: 'boolean' }, timeout: { type: 'string' } }, 1);
   const id = positionals[0];
-  if (!id) throw new UserError('usage: prdesk wait <id> [--timeout <seconds>]');
+  if (!id) throw new UserError('usage: prudent wait <id> [--timeout <seconds>]');
   const timeout = v.timeout ? Number(v.timeout) : 0;
   if (v.timeout && !(timeout > 0)) throw new UserError('--timeout must be a positive number of seconds');
   const start = Date.now();
@@ -351,7 +351,7 @@ function cmdList(argv) {
     return 0;
   }
   if (!reviews.length) {
-    out('No reviews yet. Try: prdesk demo');
+    out('No reviews yet. Try: prudent demo');
     return 0;
   }
   const rows = reviews.map(({ meta, decision }) => [meta.id, STATUS_TEXT[decision.status].toLowerCase(), `r${meta.revision}`, (meta.updatedAt || '').slice(0, 16).replace('T', ' '), `${meta.project ? meta.project + ': ' : ''}${meta.title}`]);
@@ -362,21 +362,21 @@ function cmdList(argv) {
 
 function cmdServe(argv) {
   const { values: v } = parse('serve', argv, { port: { type: 'string', short: 'p' } });
-  const port = v.port ? Number(v.port) : Number(process.env.PRDESK_PORT) || DEFAULT_PORT;
+  const port = v.port ? Number(v.port) : Number(process.env.PRUDENT_PORT) || DEFAULT_PORT;
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new UserError(`--port must be a number from 0 to 65535`);
   const { createServer } = require('./server');
   const server = createServer();
   const info = path.join(store.home(), 'server.json');
   server.on('error', (e) => {
-    if (e.code === 'EADDRINUSE') process.stderr.write(`prdesk: port ${port} is in use. Is prdesk already running? Try: prdesk serve --port ${port + 1}\n`);
-    else process.stderr.write(`prdesk: ${e.message}\n`);
+    if (e.code === 'EADDRINUSE') process.stderr.write(`prudent: port ${port} is in use. Is prudent already running? Try: prudent serve --port ${port + 1}\n`);
+    else process.stderr.write(`prudent: ${e.message}\n`);
     process.exit(1);
   });
   server.listen(port, '127.0.0.1', () => {
     const url = `http://127.0.0.1:${server.address().port}/`;
     fs.mkdirSync(store.reviewsDir(), { recursive: true, mode: 0o700 });
     store.writeJson(info, { url, port: server.address().port, pid: process.pid, startedAt: new Date().toISOString() });
-    out(`prdesk ${pkg.version} serving ${store.reviewsDir()}`);
+    out(`prudent ${pkg.version} serving ${store.reviewsDir()}`);
     out(`Open ${url}`);
   });
   const stop = () => {
@@ -410,7 +410,7 @@ function cmdDemo(argv) {
   store.setDecision(id, 'changes_requested', 'Please cap the total wait and respect Retry-After.');
   store.addRevision(id, r2, { create: false });
   out(`Created sample review "${id}" with two revisions.`);
-  out(serverUrl() ? `Open ${reviewUrl(id)}` : `Start the app with "prdesk serve", then open ${reviewUrl(id)}`);
+  out(serverUrl() ? `Open ${reviewUrl(id)}` : `Start the app with "prudent serve", then open ${reviewUrl(id)}`);
   return 0;
 }
 
@@ -436,7 +436,7 @@ async function main(argv) {
     return 0;
   }
   const fn = COMMANDS[cmd];
-  if (!fn) throw new UserError(`unknown command "${cmd}". Run "prdesk --help" for the list.`);
+  if (!fn) throw new UserError(`unknown command "${cmd}". Run "prudent --help" for the list.`);
   return (await fn(rest)) || 0;
 }
 
@@ -444,8 +444,8 @@ function run(argv) {
   main(argv).then(
     (code) => { process.exitCode = code; },
     (e) => {
-      if (e instanceof UserError) process.stderr.write(`prdesk: ${e.message}\n`);
-      else process.stderr.write(`prdesk: unexpected error: ${e.stack || e}\n`);
+      if (e instanceof UserError) process.stderr.write(`prudent: ${e.message}\n`);
+      else process.stderr.write(`prudent: unexpected error: ${e.stack || e}\n`);
       process.exitCode = e instanceof UserError ? 2 : 3;
     },
   );

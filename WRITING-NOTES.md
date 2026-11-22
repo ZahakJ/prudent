@@ -1,4 +1,4 @@
-# Writing review notes for prdesk
+# Writing review notes for prudent
 
 This file is for the **agent** (or person) submitting a change. Read it
 before writing `notes.md`.
@@ -13,7 +13,7 @@ time you use them. Do not oversell.
 Check your notes against the diff before submitting:
 
 ```sh
-prdesk check --notes notes.md --repo . --base origin/main --head HEAD
+prudent check --notes notes.md --repo . --base origin/main --head HEAD
 ```
 
 ## The format
@@ -57,7 +57,7 @@ Inside `# Walkthrough`:
 - Any other `###` heading stays part of the file's introduction.
 
 An anchor that matches nothing is still shown, at the top of its file, marked
-"anchor not found". `prdesk submit` and `prdesk check` list such anchors.
+"anchor not found". `prudent submit` and `prudent check` list such anchors.
 
 ## Style
 
@@ -71,7 +71,7 @@ An anchor that matches nothing is still shown, at the top of its file, marked
 
 ## Complete example
 
-This is the bundled sample (`prdesk demo`) for a made-up project, Kestrel.
+This is the bundled sample (`prudent demo`) for a made-up project, Kestrel.
 
 ````markdown
 # Summary

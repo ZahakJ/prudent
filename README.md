@@ -1,11 +1,13 @@
-<p align="center"><img src="docs/banner.svg" alt="prdesk: a calm local review desk for the patches your AI agents write" width="100%"></p>
+<p align="center"><img src="docs/banner.svg" alt="prudent: a calm local review desk for the patches your AI agents write" width="100%"></p>
 
-**Your coding agent wrote a patch for a project you have never opened. prdesk
+**Your coding agent wrote a patch for a project you have never opened. prudent
 puts it on your desk with a plain-language walkthrough next to every hunk, and
 sends your verdict and line comments back to the agent.** Local, offline, no
 dependencies, no git commands to type.
 
-<p align="center"><img src="docs/screenshot-changes.png" alt="The prdesk review page: a file list, the diff with the agent's notes shown above the hunks they explain, a reviewer comment on a line, and the review panel with a checklist and Approve and Request changes buttons" width="100%"></p>
+*prudent* reads as **PR·udent**: careful judgment before a pull request goes out.
+
+<p align="center"><img src="docs/screenshot-changes.png" alt="The prudent review page: a file list, the diff with the agent's notes shown above the hunks they explain, a reviewer comment on a line, and the review panel with a checklist and Approve and Request changes buttons" width="100%"></p>
 
 ## Why
 
@@ -14,7 +16,7 @@ use but have never read. Before anything goes upstream, a human should
 understand it and sign off. Doing that in a terminal means `git status`,
 `git diff`, `git log`, scrolling, and guessing at the context the agent had.
 
-prdesk turns that into a reading session:
+prudent turns that into a reading session:
 
 - The agent submits the branch plus **notes written for a newcomer**: what
   the project is, how the relevant part works, a walkthrough anchored to each
@@ -23,7 +25,7 @@ prdesk turns that into a reading session:
 - You read the summary, then the diff with the notes **inline next to the
   code**, click any line to comment, tick a short checklist, and press
   **Approve** or **Request changes**.
-- The agent reads your decision with `prdesk status --json`, fixes things and
+- The agent reads your decision with `prudent status --json`, fixes things and
   resubmits. You see **exactly what changed since the revision you last
   looked at**.
 
@@ -35,40 +37,40 @@ machine.
 Needs [Node.js](https://nodejs.org) 20 or newer and git. No `npm install`.
 
 ```sh
-git clone https://github.com/ZahakJ/prdesk && cd prdesk
-bin/prdesk demo      # creates a sample review with two revisions
-bin/prdesk serve     # then open http://127.0.0.1:4477/
+git clone https://github.com/ZahakJ/prudent && cd prudent
+bin/prudent demo      # creates a sample review with two revisions
+bin/prudent serve     # then open http://127.0.0.1:4477/
 ```
 
-Put `bin/prdesk` on your PATH (symlink it into `~/.local/bin`, or run
-`npm install -g .` in the clone) so agents can call `prdesk` directly.
+Put `bin/prudent` on your PATH (symlink it into `~/.local/bin`, or run
+`npm install -g .` in the clone) so agents can call `prudent` directly.
 
 ## The agent loop
 
 ```sh
-# 1. The agent writes notes.md (format: prdesk guide) and checks them against the diff
-prdesk check --notes notes.md --repo . --base origin/main --head HEAD
+# 1. The agent writes notes.md (format: prudent guide) and checks them against the diff
+prudent check --notes notes.md --repo . --base origin/main --head HEAD
 
 # 2. Submit for review
-prdesk submit --repo . --base origin/main --head HEAD \
+prudent submit --repo . --base origin/main --head HEAD \
   --title "Retry feed downloads with backoff" --project "Kestrel" \
   --upstream https://example.org/kestrel --notes notes.md --id kestrel-retries
 
 # 3. You review in the browser. The agent reads the outcome
-prdesk status kestrel-retries --json   # or: prdesk wait kestrel-retries --json
+prudent status kestrel-retries --json   # or: prudent wait kestrel-retries --json
 
 # 4. On "changes_requested", the agent fixes, updates notes, resubmits
-prdesk resubmit kestrel-retries --notes notes.md -m "Cap the total wait, honour Retry-After"
+prudent resubmit kestrel-retries --notes notes.md -m "Cap the total wait, honour Retry-After"
 ```
 
 To teach your agent this loop:
 
-- **Claude Code:** copy [`skills/prdesk`](skills/prdesk/SKILL.md) into
+- **Claude Code:** copy [`skills/prudent`](skills/prudent/SKILL.md) into
   `~/.claude/skills/` (or your project's `.claude/skills/`).
 - **Any agent** (Codex, Cursor, Aider, …): paste the snippet from
   [`AGENTS.md`](AGENTS.md) into the instructions file it reads.
 - Point the agent at [`WRITING-NOTES.md`](WRITING-NOTES.md), or have it run
-  `prdesk guide`, which prints the same text.
+  `prudent guide`, which prints the same text.
 
 ## The review page
 
@@ -97,21 +99,21 @@ the whole change, <kbd>a</kbd> approve, <kbd>r</kbd> request changes,
 
 | Command | What it does |
 | --- | --- |
-| `prdesk submit --repo <path> [--base <ref>] [--head <ref>] --notes <file> --title "..." [--project "..."] [--upstream <url>] [--id <slug>] [-m "..."] [--json]` | Create a review from `base...head` (the diff from their merge-base, as a pull request shows it), the commit messages and the notes. `--base` defaults to the merge-base with `origin/HEAD`, `origin/main` or `main`. |
-| `prdesk submit --patch <file> --notes <file> --title "..."` | Same, from a patch file (`git diff` or `git format-patch` output). |
-| `prdesk resubmit <id> [same options]` | Add a revision. Omitted options come from the previous revision; omitted `--notes` reuses the previous notes. Status returns to pending. |
-| `prdesk status <id> [--json]` | Decision, message, checklist and comments. Exit code 0 approved, 10 changes requested, 11 pending. |
-| `prdesk wait <id> [--timeout <s>] [--json]` | Block until approved or changes requested (exit 12 on timeout). |
-| `prdesk check --notes <file> (--repo … \| --patch …)` | Lint notes against a diff: missing sections, anchors that match nothing, files without notes. Exit 1 on warnings. |
-| `prdesk guide` | Print the notes format. |
-| `prdesk list [--json]` | All reviews, newest first. |
-| `prdesk serve [--port <n>]` | Serve the app on `127.0.0.1` (default port 4477, or `$PRDESK_PORT`). |
-| `prdesk demo` | Create a sample review. |
+| `prudent submit --repo <path> [--base <ref>] [--head <ref>] --notes <file> --title "..." [--project "..."] [--upstream <url>] [--id <slug>] [-m "..."] [--json]` | Create a review from `base...head` (the diff from their merge-base, as a pull request shows it), the commit messages and the notes. `--base` defaults to the merge-base with `origin/HEAD`, `origin/main` or `main`. |
+| `prudent submit --patch <file> --notes <file> --title "..."` | Same, from a patch file (`git diff` or `git format-patch` output). |
+| `prudent resubmit <id> [same options]` | Add a revision. Omitted options come from the previous revision; omitted `--notes` reuses the previous notes. Status returns to pending. |
+| `prudent status <id> [--json]` | Decision, message, checklist and comments. Exit code 0 approved, 10 changes requested, 11 pending. |
+| `prudent wait <id> [--timeout <s>] [--json]` | Block until approved or changes requested (exit 12 on timeout). |
+| `prudent check --notes <file> (--repo … \| --patch …)` | Lint notes against a diff: missing sections, anchors that match nothing, files without notes. Exit 1 on warnings. |
+| `prudent guide` | Print the notes format. |
+| `prudent list [--json]` | All reviews, newest first. |
+| `prudent serve [--port <n>]` | Serve the app on `127.0.0.1` (default port 4477, or `$PRUDENT_PORT`). |
+| `prudent demo` | Create a sample review. |
 
-`prdesk help <command>` or `prdesk <command> --help` shows details. Misuse
+`prudent help <command>` or `prudent <command> --help` shows details. Misuse
 exits with code 2 and says what to do.
 
-Data lives in `~/.local/share/prdesk` (override with `PRDESK_HOME`):
+Data lives in `~/.local/share/prudent` (override with `PRUDENT_HOME`):
 
 ```text
 reviews/<id>/meta.json            title, project, upstream, current revision
@@ -120,14 +122,14 @@ reviews/<id>/revs/<n>/            patch.diff, notes.md, commits.json, commits.pa
 server.json                       URL of the running server, so CLI output can link to it
 ```
 
-### `prdesk status --json` (schema `prdesk.status/v1`)
+### `prudent status --json` (schema `prudent.status/v1`)
 
 The object is stable within `v1`: fields may be added, never renamed or
 removed. A breaking change gets a new schema string.
 
 ```json
 {
-  "schema": "prdesk.status/v1",
+  "schema": "prudent.status/v1",
   "id": "kestrel-retries",
   "title": "Retry feed downloads with backoff",
   "project": "Kestrel",
@@ -192,7 +194,7 @@ Full guide with a complete example: [`WRITING-NOTES.md`](WRITING-NOTES.md).
 
 ## Security model
 
-prdesk renders text written by an AI agent and diffs of code from the
+prudent renders text written by an AI agent and diffs of code from the
 internet, in your browser, with buttons that record decisions. It is built to
 be safe with hostile content:
 
@@ -200,10 +202,10 @@ be safe with hostile content:
   whose `Host` header is not `127.0.0.1:<port>` or `localhost:<port>`, which
   stops DNS-rebinding pages.
 - **No cross-site writes.** Every write is a `POST` with a JSON body and a
-  random per-run token that only prdesk's own pages carry. Requests with a
+  random per-run token that only prudent's own pages carry. Requests with a
   foreign `Origin` or `Sec-Fetch-Site` are refused. Other websites cannot read
   the token, and cannot send JSON with a custom header without a CORS
-  preflight that prdesk never answers.
+  preflight that prudent never answers.
 - **Everything is escaped.** Patch lines, file names, commit messages, notes
   and comments are HTML-escaped. The Markdown renderer is a small built-in one
   that never passes raw HTML through and only links `http(s)` and `mailto`
@@ -215,7 +217,7 @@ be safe with hostile content:
 - **Nothing leaves the machine.** No network calls, no telemetry, no CDN.
   Review folders are created with owner-only permissions.
 
-prdesk is a single-user local tool. Anyone who can run programs as you can
+prudent is a single-user local tool. Anyone who can run programs as you can
 read and change its data, as with any file in your home folder.
 
 ## FAQ
@@ -230,7 +232,7 @@ a ready-made Claude Code skill; for others, paste the [`AGENTS.md`](AGENTS.md)
 snippet.
 
 **What if the agent's notes are thin?** The Overview flags missing sections,
-and `prdesk check` (and `submit`) list them along with anchors that match
+and `prudent check` (and `submit`) list them along with anchors that match
 nothing. Ask for better notes with *Request changes*.
 
 **Several reviews at once?** Yes. The home page lists them with status,
@@ -249,7 +251,7 @@ Issues and pull requests are welcome. Keep it dependency-free and small.
 
 ```sh
 node --test          # all tests, no install step
-bin/prdesk demo && bin/prdesk serve
+bin/prudent demo && bin/prudent serve
 ```
 
 Code style: 2-space indent, single quotes, semicolons, CommonJS, no build

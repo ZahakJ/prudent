@@ -1,12 +1,12 @@
 {
-  "name": "prdesk",
-  "version": "0.1.0",
+  "name": "prudent",
+  "version": "0.1.1",
   "description": "A calm local review desk for the patches your AI agents write: diff, plain-language walkthrough, approve or request changes.",
   "license": "MIT",
   "author": "ZahakJ",
   "keywords": ["code-review", "ai-agents", "pull-request", "diff", "patch", "review", "local-first", "claude-code"],
   "bin": {
-    "prdesk": "bin/prdesk"
+    "prudent": "bin/prudent"
   },
   "files": [
     "bin/",
@@ -25,6 +25,6 @@
   },
   "scripts": {
     "test": "node --test",
-    "start": "node bin/prdesk serve"
+    "start": "node bin/prudent serve"
   }
 }

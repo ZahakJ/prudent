@@ -24,8 +24,8 @@ jobs:
       - run: node --test
       - name: CLI smoke test
         run: |
-          export PRDESK_HOME="$RUNNER_TEMP/prdesk"
-          node bin/prdesk --version
-          node bin/prdesk demo
-          node bin/prdesk list
-          node bin/prdesk status demo-kestrel-retries --json > /dev/null || [ $? -eq 11 ]
+          export PRUDENT_HOME="$RUNNER_TEMP/prudent"
+          node bin/prudent --version
+          node bin/prudent demo
+          node bin/prudent list
+          node bin/prudent status demo-kestrel-retries --json > /dev/null || [ $? -eq 11 ]

@@ -29,7 +29,7 @@ function request(method, path, { headers = {}, body, host } = {}) {
   });
 }
 
-const json = { 'content-type': 'application/json', 'x-prdesk-token': TOKEN };
+const json = { 'content-type': 'application/json', 'x-prudent-token': TOKEN };
 
 test.before(async () => {
   addSampleReview('evil', store);
@@ -91,7 +91,7 @@ test('POST without the token is refused and nothing is saved', async () => {
   const before = store.loadDecision('evil').comments.length;
   const r = await request('POST', '/api/r/evil/comment', { headers: { 'content-type': 'application/json' }, body: { kind: 'general', body: 'hi' } });
   assert.equal(r.status, 403);
-  const wrong = await request('POST', '/api/r/evil/decision', { headers: { ...json, 'x-prdesk-token': 'nope' }, body: { status: 'approved' } });
+  const wrong = await request('POST', '/api/r/evil/decision', { headers: { ...json, 'x-prudent-token': 'nope' }, body: { status: 'approved' } });
   assert.equal(wrong.status, 403);
   assert.equal(store.loadDecision('evil').comments.length, before);
   assert.equal(store.loadDecision('evil').status, 'pending');
@@ -102,7 +102,7 @@ test('cross-origin and form posts are refused even with a token', async () => {
   assert.equal(cross.status, 403);
   const site = await request('POST', '/api/r/evil/decision', { headers: { ...json, 'sec-fetch-site': 'cross-site' }, body: { status: 'approved' } });
   assert.equal(site.status, 403);
-  const form = await request('POST', '/api/r/evil/decision', { headers: { 'x-prdesk-token': TOKEN, 'content-type': 'application/x-www-form-urlencoded' }, body: 'status=approved' });
+  const form = await request('POST', '/api/r/evil/decision', { headers: { 'x-prudent-token': TOKEN, 'content-type': 'application/x-www-form-urlencoded' }, body: 'status=approved' });
   assert.equal(form.status, 415);
   assert.equal(store.loadDecision('evil').status, 'pending');
 });
@@ -122,7 +122,7 @@ test('path traversal is refused', async () => {
   ]) {
     const r = await request('GET', p);
     assert.ok([400, 404].includes(r.status), `${p} -> ${r.status}`);
-    assert.doesNotMatch(r.body, /"schema"|"name": "prdesk"/);
+    assert.doesNotMatch(r.body, /"schema"|"name": "prudent"/);
   }
   const ok = await request('GET', '/r/evil/raw/1/patch.diff');
   assert.equal(ok.status, 200);
