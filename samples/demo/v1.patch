@@ -1,0 +1,163 @@
+From 0000000000000000000000000000000000000001 Mon Sep 17 00:00:00 2001
+From: Sample Agent <agent@example.org>
+Date: Mon, 2 Nov 2026 10:00:00 +0000
+Subject: [PATCH] fetch: retry transient failures with exponential backoff
+
+Busy feed servers answer 503 or 429 now and then, and kestrel gave up
+on the first error. Retry those, and connection errors, up to three
+times with exponential backoff. --retries 0 turns it off.
+---
+ README.md                                   |   5 +++
+ docs/NOTES.txt                              |   1 -
+ docs/retry-diagram.png                      | Bin 0 -> 20 bytes
+ kestrel/cli.py                              |   3 +-
+ kestrel/fetch.py                            |  26 ++++++++---
+ tests/{test_parse.py => test_feed_parse.py} |   0
+ tests/test_fetch.py                         |  47 ++++++++++++++++++++
+ 7 files changed, 75 insertions(+), 7 deletions(-)
+ delete mode 100644 docs/NOTES.txt
+ create mode 100644 docs/retry-diagram.png
+ rename tests/{test_parse.py => test_feed_parse.py} (100%)
+ create mode 100644 tests/test_fetch.py
+
+diff --git a/README.md b/README.md
+index f31c584..247caac 100644
+--- a/README.md
++++ b/README.md
+@@ -1,3 +1,8 @@
+ # Kestrel
+ 
+ A tiny command-line feed reader.
++
++## Retries
++
++Kestrel retries busy servers (HTTP 429 and 5xx) with exponential backoff.
++Use `--retries 0` to turn it off.
+diff --git a/docs/NOTES.txt b/docs/NOTES.txt
+deleted file mode 100644
+index 8206f26..0000000
+--- a/docs/NOTES.txt
++++ /dev/null
+@@ -1 +0,0 @@
+-Old scratch notes. Nothing here is current.
+diff --git a/docs/retry-diagram.png b/docs/retry-diagram.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..5b7d1ca0ae1e65da75b02e4d87cedec1edd00589
+GIT binary patch
+literal 20
+bcmeAS@N?(olHy`uVBq!ia0y~yU=RQRCN=`@
+
+literal 0
+HcmV?d00001
+
+diff --git a/kestrel/cli.py b/kestrel/cli.py
+index 189b41a..386540d 100644
+--- a/kestrel/cli.py
++++ b/kestrel/cli.py
+@@ -7,6 +7,7 @@ from .parse import parse_feed
+ def main(argv=None):
+     parser = argparse.ArgumentParser(prog="kestrel")
+     parser.add_argument("url")
++    parser.add_argument("--retries", type=int, default=3, help="retry transient failures this many times")
+     args = parser.parse_args(argv)
+-    for item in parse_feed(fetch(args.url)):
++    for item in parse_feed(fetch(args.url, retries=args.retries)):
+         print(item.title)
+diff --git a/kestrel/fetch.py b/kestrel/fetch.py
+index 94ea3fc..8d27e84 100644
+--- a/kestrel/fetch.py
++++ b/kestrel/fetch.py
+@@ -1,12 +1,28 @@
+-"""Download feeds over HTTP."""
++"""Download feeds over HTTP, retrying transient failures."""
+ 
++import time
++import urllib.error
+ import urllib.request
+ 
+ USER_AGENT = "kestrel/0.4"
++RETRY_STATUS = {429, 500, 502, 503, 504}
+ 
+ 
+-def fetch(url, timeout=10):
+-    """Return the body of url as bytes."""
++def fetch(url, timeout=10, retries=3, backoff=1.0, sleep=time.sleep):
++    """Return the body of url as bytes.
++
++    Retries up to `retries` times on connection errors and on the HTTP
++    statuses in RETRY_STATUS, waiting backoff, 2*backoff, 4*backoff... seconds.
++    """
+     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+-    with urllib.request.urlopen(request, timeout=timeout) as response:
+-        return response.read()
++    for attempt in range(retries + 1):
++        try:
++            with urllib.request.urlopen(request, timeout=timeout) as response:
++                return response.read()
++        except urllib.error.HTTPError as e:
++            if e.code not in RETRY_STATUS or attempt == retries:
++                raise
++        except urllib.error.URLError:
++            if attempt == retries:
++                raise
++        sleep(backoff * 2 ** attempt)
+diff --git a/tests/test_parse.py b/tests/test_feed_parse.py
+similarity index 100%
+rename from tests/test_parse.py
+rename to tests/test_feed_parse.py
+diff --git a/tests/test_fetch.py b/tests/test_fetch.py
+new file mode 100644
+index 0000000..5b6bd97
+--- /dev/null
++++ b/tests/test_fetch.py
+@@ -0,0 +1,47 @@
++import urllib.error
++
++import pytest
++
++from kestrel import fetch as fetch_module
++
++
++class FakeResponse:
++    def __init__(self, body):
++        self.body = body
++
++    def __enter__(self):
++        return self
++
++    def __exit__(self, *exc):
++        return False
++
++    def read(self):
++        return self.body
++
++
++def failing_then(body, failures):
++    calls = []
++
++    def urlopen(request, timeout):
++        calls.append(request)
++        if len(calls) <= failures:
++            raise urllib.error.HTTPError(request.full_url, 503, "busy", {}, None)
++        return FakeResponse(body)
++
++    return urlopen, calls
++
++
++def test_retries_then_succeeds(monkeypatch):
++    urlopen, calls = failing_then(b"ok", failures=2)
++    monkeypatch.setattr(fetch_module.urllib.request, "urlopen", urlopen)
++    waits = []
++    assert fetch_module.fetch("http://x", sleep=waits.append) == b"ok"
++    assert waits == [1.0, 2.0]
++
++
++def test_gives_up(monkeypatch):
++    urlopen, calls = failing_then(b"ok", failures=10)
++    monkeypatch.setattr(fetch_module.urllib.request, "urlopen", urlopen)
++    with pytest.raises(urllib.error.HTTPError):
++        fetch_module.fetch("http://x", retries=2, sleep=lambda s: None)
++    assert len(calls) == 3
+-- 
+2.54.0
+
