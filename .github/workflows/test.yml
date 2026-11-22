@@ -1,0 +1,31 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --test
+      - name: CLI smoke test
+        run: |
+          export PRDESK_HOME="$RUNNER_TEMP/prdesk"
+          node bin/prdesk --version
+          node bin/prdesk demo
+          node bin/prdesk list
+          node bin/prdesk status demo-kestrel-retries --json > /dev/null || [ $? -eq 11 ]
